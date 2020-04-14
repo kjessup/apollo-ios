@@ -363,6 +363,9 @@ extension WebSocketTransport: WebSocketDelegate {
 
     if reconnect.value {
       DispatchQueue.main.asyncAfter(deadline: .now() + reconnectionInterval) {
+				if let httpDelegate = self.delegate as? HTTPNetworkTransportPreflightDelegate {
+					httpDelegate.networkTransport(self, willSend: &self.websocket.request)
+				}
         self.websocket.connect()
       }
     }
