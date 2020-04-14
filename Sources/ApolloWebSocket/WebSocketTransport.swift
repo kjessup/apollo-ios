@@ -7,12 +7,14 @@ import Foundation
 // MARK: - Transport Delegate
 
 public protocol WebSocketTransportDelegate: class {
+  func webSocketTransportDidWillReconnect(_ webSocketTransport: WebSocketTransport, willSend request: inout URLRequest)
   func webSocketTransportDidConnect(_ webSocketTransport: WebSocketTransport)
   func webSocketTransportDidReconnect(_ webSocketTransport: WebSocketTransport)
   func webSocketTransport(_ webSocketTransport: WebSocketTransport, didDisconnectWithError error:Error?)
 }
 
 public extension WebSocketTransportDelegate {
+	func webSocketTransportDidWillReconnect(_ webSocketTransport: WebSocketTransport, willSend request: inout URLRequest) {}
   func webSocketTransportDidConnect(_ webSocketTransport: WebSocketTransport) {}
   func webSocketTransportDidReconnect(_ webSocketTransport: WebSocketTransport) {}
   func webSocketTransport(_ webSocketTransport: WebSocketTransport, didDisconnectWithError error:Error?) {}
@@ -363,9 +365,7 @@ extension WebSocketTransport: WebSocketDelegate {
 
     if reconnect.value {
       DispatchQueue.main.asyncAfter(deadline: .now() + reconnectionInterval) {
-				if let httpDelegate = self.delegate as? HTTPNetworkTransportPreflightDelegate {
-					httpDelegate.networkTransport(self, willSend: &self.websocket.request)
-				}
+        self.delegate?.webSocketTransportDidWillReconnect(self, willSend: &self.websocket.request)
         self.websocket.connect()
       }
     }
