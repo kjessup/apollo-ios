@@ -7,14 +7,14 @@ import Foundation
 // MARK: - Transport Delegate
 
 public protocol WebSocketTransportDelegate: class {
-	func webSocketTransportWillReconnect(_ webSocketTransport: WebSocketTransport, willSend request: inout URLRequest, ready: @escaping () -> ())
+	func webSocketTransportWillReconnect(_ webSocketTransport: WebSocketTransport, willSend request: inout URLRequest)
   func webSocketTransportDidConnect(_ webSocketTransport: WebSocketTransport)
   func webSocketTransportDidReconnect(_ webSocketTransport: WebSocketTransport)
   func webSocketTransport(_ webSocketTransport: WebSocketTransport, didDisconnectWithError error:Error?)
 }
 
 public extension WebSocketTransportDelegate {
-	func webSocketTransportWillReconnect(_ webSocketTransport: WebSocketTransport, willSend request: inout URLRequest, ready: @escaping () -> ()) { ready() }
+	func webSocketTransportWillReconnect(_ webSocketTransport: WebSocketTransport, willSend request: inout URLRequest) {}
   func webSocketTransportDidConnect(_ webSocketTransport: WebSocketTransport) {}
   func webSocketTransportDidReconnect(_ webSocketTransport: WebSocketTransport) {}
   func webSocketTransport(_ webSocketTransport: WebSocketTransport, didDisconnectWithError error:Error?) {}
@@ -364,10 +364,9 @@ extension WebSocketTransport: WebSocketDelegate {
     acked = false // need new connect and ack before sending
 
     if reconnect.value {
+			self.delegate?.webSocketTransportWillReconnect(self, willSend: &self.websocket.request)
       DispatchQueue.main.asyncAfter(deadline: .now() + reconnectionInterval) {
-				self.delegate?.webSocketTransportWillReconnect(self, willSend: &self.websocket.request) {
 					self.websocket.connect()
-				}
       }
     }
   }
